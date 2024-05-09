@@ -1,12 +1,10 @@
 # Objetivo
 Fazer um sensor de medida de volume de caixa d'água, incluindo compras dos itens, instalação, configuração e rodar. O projeto original é do [Fórum HomeAssistant Brasil](https://homeassistantbrasil.com.br/t/medindo-o-volume-da-caixa-de-agua/3668)
 
-1) Pré-Requisitos
+## Pré-Requisitos
 - [ ] Conexão de internet com sinal Wi-Fi chegando até a caixa d'água
-- [ ] Ponto de energia elétrica para conectar os itens
-- [ ] Conhecimentos em informática básicos e falta de medo de seguir esse passo a passo
-- [ ] Saber ligar um fio em outro, usar uma furadeira
-2) Compras
+- [ ] Ponto de energia elétrica junto a caixa d'água
+## Itens necessários
 - [ ] **NodeMCU ESP32** que irá realizar a leitura desse sensor, calcular o volume e expor esses dados no HomeAssistant
 - [ ] **Sensor ultrassônico** (JSN-SR04T ou JSN-Y2-1) para emitir um pulso que irá medir a distância da tampa da caixa até o nível da água
 - [ ] Fios DuPont fêmea para fêmea para ligar o NodeMCU ao sensor ultrâssonico
@@ -14,22 +12,22 @@ Fazer um sensor de medida de volume de caixa d'água, incluindo compras dos iten
 - [ ] Furadeira e serra-copo 5mm para fazer os furos do sensor na tampa da caixa
 - [ ] Caixa hermética para colocar os itens acima caso a caixa d'água seja externa
 - [ ] Opcional: cola quente para fixar o sensor na tampa.
-3) Instalação e configuração
+### Instalação e configuração
 - [ ] Carregar o software no nodeMCU através de um cabo USB
 - [ ] Instalar o sensor na tampa da caixa d'agua
 - [ ] Ligar os fios do sensor ao nodeMCU, e do carregador do nodeMCU a ele
 - [ ] Fazer a instalação do tailscale para monitoramento remoto
 
-## Passo 1 - Compras
+# Passo 1 - Itens
 
-### AliExpress
+## AliExpress
 - [NodeMCU](https://www.aliexpress.com/item/1005005977505151.html?spm=a2g0o.productlist.main.1.6b881568z6HXO3&algo_pvid=3d980182-4747-48c2-b768-fa3630e00195&algo_exp_id=3d980182-4747-48c2-b768-fa3630e00195-0&pdp_npi=4%40dis%21BRL%2136.71%2111.38%21%21%2149.52%2115.35%21%4021032dcb17151818189177583ec215%2112000035141219305%21sea%21BR%211907945182%21&curPageLogUid=LMfOcIXKtVlR&utparam-url=scene%3Asearch%7Cquery_from%3A)
 - [Sensor Ultrassônico](https://www.aliexpress.com/item/1005005995118143.html?spm=a2g0o.productlist.main.3.49f632dbFzaqVy&algo_pvid=622ac9e1-a2b9-4503-874d-5cb7d8005776&algo_exp_id=622ac9e1-a2b9-4503-874d-5cb7d8005776-1&pdp_npi=4%40dis%21BRL%2123.38%2115.54%21%21%2131.54%2120.96%21%402101e9ec17151819516342394edb60%2112000035288838952%21sea%21BR%211907945182%21&curPageLogUid=ZOIxaVGXOsXz&utparam-url=scene%3Asearch%7Cquery_from%3A)
 - [Cabos DuPont](https://www.aliexpress.com/item/32661309874.html?spm=a2g0o.productlist.main.3.6155hPfbhPfbO3&algo_pvid=62220dc5-d55b-4ef1-ab40-244b6155c782&algo_exp_id=62220dc5-d55b-4ef1-ab40-244b6155c782-1&pdp_npi=4%40dis%21BRL%216.54%216.54%21%21%211.22%211.22%21%402101f04d17151822093485980ef3c8%2166291977410%21sea%21BR%211907945182%21&curPageLogUid=nYAbEDcfU2aV&utparam-url=scene%3Asearch%7Cquery_from%3A)
 
-## Passo 2 - Instalação e Configuração
+# Passo 2 - Instalação e Configuração
 
-### NodeMCU
+## NodeMCU
 
 O primeiro passo é fazer o carregamento do software ao nodeMCU, para que ao você chegar para a instalação completa, basta ligar a tomada e pronto. Para isso, será necessário instalar o software esphome
 1) Instalar o Python no Windows
@@ -418,7 +416,7 @@ sensor:
 8) Desconectar o NodeMCU do seu computador, e ligar ele ao carregador USB simples. ELe irá piscar apenas um led quando for ligado, e após alguns minutos, deverá aparecer no dashboard como ONLINE.
 9) Pronto, o nodeMCU está pronto para conectar ao seu wifi, ler os dados do sensor e enviar aos dados ao MQTT.
 
-### Sensor ultrassônico
+## Sensor ultrassônico
 
 O sensor comprado virá com 1 ou 2 peças pretas, que são o sensor em si, e uma placa de controle. Para o sensor em si:
 1) Fazer um furo com uma serra-copo de 5mm na tampa da caixa d'água
