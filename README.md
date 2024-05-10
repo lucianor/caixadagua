@@ -27,7 +27,7 @@ O primeiro passo é fazer o carregamento do software ao NodeMCU, para que ao voc
 1) Instalar o Python no Windows e adicionar o python na variável de ambiente PATH - instruções [aqui](https://dicasdeprogramacao.com.br/como-instalar-o-python-no-windows-10/#google_vignette)
 2) Abrir um prompt de comando do Windows (instruções acima) e copiar e colar o texto abaixo e dar ENTER
 ```
-pip install tornado esptool esphome wheel
+pip install tornado esptool esphome dashboard config
 ```
 3) Ao final irá exibir uma mensagem XXXX. Agora é necessário carregar o dashboard do esphome:
 ```
