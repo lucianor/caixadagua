@@ -6,7 +6,7 @@ O local onde está a caixa d'água precisa ter uma tomada para conectar o sensor
 # Passo 1 - Itens
 
 ## Itens necessários
-- [ ] **NodeMCU ESP32** que irá realizar a leitura desse sensor, calcular o volume e expor esses dados no HomeAssistant
+- [ ] **NodeMCU v3** que irá realizar a leitura desse sensor, calcular o volume e expor esses dados no HomeAssistant
 - [ ] **Sensor ultrassônico** (JSN-SR04T ou JSN-Y2-1) para emitir um pulso que irá medir a distância da tampa da caixa até o nível da água
 - [ ] Fios DuPont fêmea para fêmea para ligar o NodeMCU ao sensor ultrâssonico
 - [ ] Carregador de celular simples para dar energia ao NodeMCU e cabo micro USB
@@ -39,85 +39,68 @@ esphome dashboard config --open-ui
 7) Isso irá abrir uma nova configuração de dispositivo onde você irá carregar esse código. Altere a sua RedeWi-fi e SenhaWi-fi. O demais pode deixar como está.
 ```
 substitutions:
-  #Configurações da placa:
-  Plataforma: ESP8266
-  TipoPlaca: d1_mini
-  
   #Configurações do dispositivo:
   hostname: 'caixaagua' #Hostname do dispositivo na rede
   PrefixoNome: "Caixa Água - "
   
   #Configurações da Rede:
-  RedeWi-fi: !secret RedeWi-fi #Nome da rede Wi-fi que o dispositivo irá se conectar
-  SenhaWi-fi: !secret  SenhaWi-fi #Senha da rede Wi-fi que o dispositivo irá se conectar
-  SenhaWi-fiReconfig: !secret SenhaWi-fiReconfig #Senha do AP Wi-fi para reconfiguração do Wi-fi do dispositivo
-  EndConfig: ${hostname}.local #192.168.1.50 #Endereço para configuração (IP que o esp está acessível atualmente na rede), especialmente usado quando quer alterar o hostname via OTA
-  Wi-fiOculto: 'False' #Se a rede Wi-fi está oculta defina como 'True'
-  Wi-fiFastConnect: 'False' #Se o esp realizará a conexão à rede Wi-fi sem escanear as redes disponíveis defina como 'True'
+  RedeWifi: !secret wifi_ssid #Nome da rede wifi que o dispositivo irá se conectar
+  SenhaWifi: !secret wifi_password #Senha da rede wifi que o dispositivo irá se conectar
+  SenhaWifiReconfig: !secret SenhaWifiReconfig #Senha do AP Wifi para reconfiguração do wifi do dispositivo
+  EndConfig: '192.168.0.66' #192.168.1.50 #Endereço para configuração (IP que o esp está acessível atualmente na rede), especialmente usado quando quer alterar o hostname via OTA
+  WifiOculto: 'False' #Se a rede wifi está oculta defina como 'True'
+  WifiFastConnect: 'True' #Se o esp realizará a conexão à rede wifi sem escanear as redes disponíveis defina como 'True'
 
-  #Senhas
-  SenhaAPI: !secret SenhaAPI #Senha para adicionar o esp no HA
-  SenhaOTA: !secret SenhaOTA #Senha para atualizar o firmware do esp via OTA
-  
   #Pinos do Sensor
   SensorTriggerPin: D6
   SensorEchoPin: D7
   
   #INFORMAÇÕES FÍSICAS DA CAIXA E DA INSTALAÇÃO DO SENSOR (medidas em metros):
   #Diametro interno da base da caixa (fundo)
-  DD1: "0.95"
+  DD1: "1.17"
   #Diametro interno da borda superior sem a tampa
-  DM: "1.22"
+  DM: "1.34"
   #Distância entre o fundo da caixa e a borda sem a tampa 
-  HB: "0.58"
+  HB: "0.84" # MEDIDO 
   #Distância entre o fundo da caixa e a borda superior da tampa (onde o sensor será instalado)
-  HT: "0.72"
-  #Distância entre o fundo da caixa e o nível da base da tubulação de saída (altura da coluna de água do nível morto)
-  HMT: "0.038"
+  HT: "0.95" # REVISAR
+  #Distância entre o fundo da caixa e o nível da base da tubulação de saída (altura da coluna de água do nível morto) -- CALC
+  HMT: "0.07" # REVISAR
   #Distância entre o fundo da caixa e o nível máximo normal (altura da água onde a boia é fechada)
-  HM: "0.54"
+  HM: "0.67" # MEDIDO
   #Distância entre o sensor e o nível máximo normal (altura onde a boia é fechada até o sensor)
-  HS: "0.22"
+  HS: "0.28" # REVISAR
   #Distância entre o fundo da caixa e o nível de transbordamento (ou nível do extravasor/ladrão, o que o ocorrer primeiro)
-  HMA: "0.55"
-
-#Logger
-  LoggerUART: UART0_SWAP
-  LoggerLevel: DEBUG
+  HMA: "0.78" # REVISAR
 
 esphome:
   name: $hostname
-  platform: ${Plataforma}
-  board: ${TipoPlaca}
+  platform: ESP8266
+  board: nodemcuv2
   
-Wi-fi:
+wifi:
   networks:
-  - ssid: ${RedeWi-fi}
-    password: ${SenhaWi-fi}
-    hidden: ${Wi-fiOculto}
-  fast_connect: ${Wi-fiFastConnect}
+  - ssid: ${RedeWifi}
+    password: ${SenhaWifi}
+    hidden: ${WifiOculto}
+  fast_connect: ${WifiFastConnect}
   use_address: ${EndConfig}
-  
-  # Enable fallback hotspot (captive portal) in case Wi-fi connection fails
-  ap:
-    ssid: Wi-fi
-    password: ${SenhaWi-fiReconfig}
-
-#Habilita um AP Wi-fi para reconfigurar em caso de perda de conexão com a rede configurada
-captive_portal:
 
 #Habilita a atualização de firmware por OTA
 ota:
-  password: ${SenhaOTA}
+  password: ${SenhaWifiReconfig}
   
 #Habilita as mensagens de logs pela porta serial e via MQTT
 logger:
-  hardware_uart: ${LoggerUART}
-  level: ${LoggerLevel}
+  level: ERROR
+  logs:
+    app: ERROR
+    sensor: ERROR
 
 #Habilita a api para comunicar com o Home Assistant
 api:
-  password: ${SenhaAPI}
+  encryption:
+    key: 'YGMhClFcQ6wOhwLM69E2ZNm1Vxa6LQE23OGGSnV8xo0='
 
 switch:
 ############################# SENSORES DEVICE ##################################
@@ -126,26 +109,6 @@ switch:
     id: ${hostname}_restart
     name: ${PrefixoNome} Reiniciar
     icon: mdi:restart
-
-text_sensor:
-############################# SENSORES DEVICE ##################################
-  #Informações da conexão Wi-fi
-  - platform: Wi-fi_info
-    #Endereço IP
-    ip_address:
-      id: ${hostname}_IP
-      name: ${PrefixoNome} Endereço IP
-      icon: mdi:ip-network
-    #Nome da Rede
-    ssid:
-      id: ${hostname}_SSID
-      name: ${PrefixoNome} Rede Wi-fi
-      icon: mdi:Wi-fi
-  #Informação da versão da compilação
-  - platform: version
-    id: ${hostname}_versao
-    name: ${PrefixoNome} Versão
-    icon: mdi:information
 
 binary_sensor:
 ############################# SENSORES DEVICE ##################################
@@ -193,21 +156,41 @@ binary_sensor:
       }
 
 sensor:
+############################ IMPORT VARIAVÉIS HA ###############################
+  - platform: homeassistant
+    id: AMIN
+    name: ${PrefixoNome} Nível Mínimo de Alerta
+    internal: true #false Apenas para debug
+    entity_id: input_number.caixa_agua_alerta_nivel_minimo
+    accuracy_decimals: 2
+
+  - platform: homeassistant
+    id: AMAX
+    name: ${PrefixoNome} Nível Máximo de Alerta
+    internal: true #false Apenas para debug
+    entity_id: input_number.caixa_agua_alerta_nivel_maximo
+    accuracy_decimals: 2
+
 ############################ SENSOR ULTRASONICO ################################
   - platform: ultrasonic
     id: HMED
-    trigger_pin: ${SensorTriggerPin}
-    echo_pin: ${SensorEchoPin}
+    trigger_pin:
+      number: ${SensorTriggerPin}
+      inverted: true
+    echo_pin: 
+      number: ${SensorEchoPin}
     name: ${PrefixoNome} Distância Medida Sensor
-    internal: false
     accuracy_decimals: 6
-    update_interval: 0.5s
+    timeout: 4m
+    update_interval: 30s
     filters:
       - median:
-          window_size: 20
-          send_every: 20
-          send_first_at: 20
-      
+          window_size: 5
+          send_every: 3
+          send_first_at: 2
+    #pulse_time: 10us
+
+
 #################### INFORMAÇÕES FÍSICAS DA INSTALAÇÃO #########################
   #Diametro interno da base da caixa (fundo)
   - platform: template
@@ -217,7 +200,7 @@ sensor:
     unit_of_measurement: m
     lambda: return ${DD1};
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
 
   #Diametro interno da borda superior sem a tampa
   - platform: template
@@ -227,7 +210,7 @@ sensor:
     unit_of_measurement: m
     lambda: return ${DM};
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
 
   #Distância entre o fundo da caixa e a borda sem a tampa
   - platform: template
@@ -237,7 +220,7 @@ sensor:
     unit_of_measurement: m
     lambda: return ${HB};
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
 
   #Distância entre o fundo da caixa e a borda superior da tampa (onde o sensor será instalado)
   - platform: template
@@ -247,7 +230,7 @@ sensor:
     unit_of_measurement: m
     lambda: return ${HT};
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
     
   #Distância entre o fundo da caixa e o nível da base da tubulação de saída (altura da coluna de água do nível morto)
   - platform: template
@@ -257,7 +240,7 @@ sensor:
     unit_of_measurement: m
     lambda: return ${HMT};
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
   
   #Distância entre o fundo da caixa e o nível máximo normal (altura da água onde a boia é fechada)
   - platform: template
@@ -267,7 +250,7 @@ sensor:
     unit_of_measurement: m
     lambda: return ${HM};
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
   
   #Distância entre o sensor e o nível máximo normal (altura onde a boia é fechada até o sensor)
   - platform: template
@@ -277,7 +260,7 @@ sensor:
     unit_of_measurement: m
     lambda: return ${HS};
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
 
   #Distância entre o fundo da caixa e o nível de transbordamento (ou nível do extravasor/ladrão, o que o ocorrer primeiro)
   - platform: template
@@ -287,7 +270,7 @@ sensor:
     unit_of_measurement: m
     lambda: return ${HMA};
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
     
 ######################### CÁLCULOS AUXILIARES ##################################
   #Coluna de água medida (descontado a distância do sensor)
@@ -298,7 +281,7 @@ sensor:
     unit_of_measurement: m
     lambda: return (id(HM).state+id(HS).state-id(HMED).state);
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
     
   #Raio menor do reservatório
   - platform: template
@@ -308,7 +291,7 @@ sensor:
     unit_of_measurement: m
     lambda: return (id(DD1).state/2);
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
   
   #Raio maior máximo do reservatório
   - platform: template
@@ -318,7 +301,7 @@ sensor:
     unit_of_measurement: m
     lambda: return (id(DM).state/2);
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
   
   #Raio maior máximo de acordo com o nível máximo de água
   - platform: template
@@ -328,7 +311,7 @@ sensor:
     unit_of_measurement: m
     lambda: return (id(R1).state+(id(HM).state*tan(atan(((id(DM).state-id(DD1).state)/2)/(id(HB).state)))));
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
   
   #Raio maior atual do reservatório (de acordo com o nível da água)
   - platform: template
@@ -338,7 +321,7 @@ sensor:
     unit_of_measurement: m
     lambda: return (id(R1).state+(id(H).state*tan(atan(((id(DM).state-id(DD1).state)/2)/(id(HB).state)))));
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
   
   #Raio maior o volume morto
   - platform: template
@@ -348,7 +331,7 @@ sensor:
     unit_of_measurement: m
     lambda: return (id(R1).state+(id(HMT).state*tan(atan(((id(DM).state-id(DD1).state)/2)/(id(HB).state)))));
     accuracy_decimals: 4
-    update_interval: 1s
+    update_interval: 30s
     
 ########################## CÁLCULOS DOS VOLUMES#################################
   #Volume com o reservatório cheio (altura da borda)
@@ -359,7 +342,7 @@ sensor:
     unit_of_measurement: litros
     lambda: return ((1.047197*id(HB).state)*((id(RM).state*id(RM).state)+(id(RM).state*id(R1).state)+(id(R1).state*id(R1).state))*1000)-id(VMT).state;
     accuracy_decimals: 0
-    update_interval: 1s
+    update_interval: 30s
 
   #Volume de água do volume morto (abaixo da saída)
   - platform: template
@@ -369,7 +352,7 @@ sensor:
     unit_of_measurement: litros
     lambda: return ((1.047197*id(HMT).state)*((id(RHMT).state*id(RHMT).state)+(id(RHMT).state*id(R1).state)+(id(R1).state*id(R1).state))*1000);
     accuracy_decimals: 0
-    update_interval: 1s
+    update_interval: 30s
 
   #Volume de água com o nível máximo
   - platform: template
@@ -379,7 +362,7 @@ sensor:
     unit_of_measurement: litros
     lambda: return ((1.047197*id(HM).state)*((id(R2M).state*id(R2M).state)+(id(R2M).state*id(R1).state)+(id(R1).state*id(R1).state))*1000)-id(VMT).state;
     accuracy_decimals: 0
-    update_interval: 1s
+    update_interval: 30s
     
   #Volume de Água
   - platform: template
@@ -395,7 +378,7 @@ sensor:
         return (((1.047197*id(H).state)*((id(R2).state*id(R2).state)+(id(R2).state*id(R1).state)+(id(R1).state*id(R1).state))*1000)-id(VMT).state);
       }
     accuracy_decimals: 0
-    update_interval: 1s
+    update_interval: 30s
 
   #Volume Percentual
   - platform: template
@@ -404,7 +387,7 @@ sensor:
     unit_of_measurement: "%"
     lambda: return ((id(VAGUA).state / id(VT).state)*100);
     accuracy_decimals: 1
-    update_interval: 1s
+    update_interval: 30s
 ```
 7) Após isso, clicar em Install. Irá exibir várias mensagens e deverá demorar uns 5 a 10 minutos para finalizar. Quando terminar, irá exibir a mensagem XXXXX
 8) Desconectar o NodeMCU do seu computador, e ligar ele ao carregador USB simples. ELe irá piscar apenas um led quando for ligado. Volte ao dashboard e verifique após alguns minutos que o dispositivo aparece como ONLINE.
